@@ -1,13 +1,15 @@
 const express= require("express")
 const bodyParser= require("body-parser")
-const route= require("../src/route/route")
+const route= require("../src/route/routes")
 const mongoose= require("mongoose")
 const app= express();
+const multer = require("multer")
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use( multer().any())
 
-mongoose.connect("--------Your MongoDB String --------", {
+mongoose.connect("mongodb+srv://swati_pathak:DGhDxlBIIfyRwGwk@cluster0.ogdpf.mongodb.net/group-16Database", {
     useNewUrlParser: true
 })
 .then( () => console.log("MongoDb is connected"))
