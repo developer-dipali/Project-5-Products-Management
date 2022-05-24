@@ -30,37 +30,42 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
-        minLength: 8,
-        maxLength: 15
+        required: true
+        
     }, 
     address: {
         shipping: {
             street: {
                 type: String,
-                required: true
+                required: true,
+                trim:true
             },
             city: {
                 type: String,
-                required: true
+                required: true,
+                trim:true
             },
             pincode: {
                 type: Number,
-                required: true
+                required: true,
+                trim:true
             }
         },
         billing: {
             street: {
                 type: String,
-                required: true
+                required: true,
+                trim:true
             },
             city: {
                 type: String,
-                required: true
+                required: true,
+                trim:true
             },
             pincode: {
                 type: Number,
-                required: true
+                required: true,
+                trim:true
             }
         }
     }
