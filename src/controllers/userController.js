@@ -215,7 +215,7 @@ const createUser =async (req,res)=>{
     
 
                 if (!isValid(billing.pincode)) {
-                    return res.status(400).send({ status: false, message: "billing street is required" })
+                    return res.status(400).send({ status: false, message: "billing pincode is required" })
                 }
 
                  //applicable only for numeric values and extend to be 6 characters only--
@@ -397,18 +397,18 @@ const loginUser = async function (req, res) {
             data["profileImage"]=uploadedFileURL
         }
         
-        if(isValid(fname)){
-            data.fname=fname 
-        }
-        if(isValid(lname)){
-            data.lname=lname
-        }
-        if(isValid(email)){
-            data.email=email
-        }
-        if(isValid(password)){
-            data.password=password
-        }
+        // if(isValid(fname)){
+        //     data.fname=fname 
+        // }
+        // if(isValid(lname)){
+        //     data.lname=lname
+        // }
+        // if(isValid(email)){
+        //     data.email=email
+        // }
+        // if(isValid(password)){
+        //     data.password=password
+        // }
         if(address){
             console.log(1)
             data.address=JSON.parse(data.address)
@@ -443,10 +443,26 @@ const loginUser = async function (req, res) {
                 }
             }
         }
-        let newData=Object.assign(user,data)
+
+        //let newData=Object.assign(user,data)
         //console.log(newData)
         
-        let updatedData=await userModel.findByIdAndUpdate(pathParams,data,{new:true})
+        let updatedData=await userModel.findByIdAndUpdate({_id:pathParams},{fname:data.fname,lname:data.lname,
+            email:data.email,profileImage:data.profileImage,phone:data.phone,password:data.password,
+            address:{
+                shipping:{
+                    street:data.address?.shipping?.street || user.address.shipping.street ,
+                    city:data.address?.shipping?.city || user.address.shipping.city,
+                    pincode:data.address?.shipping?.pincode || user.address.shipping.pincode 
+                },
+                billing:{
+                    street:data.address?.billing?.street || user.address.billing.street ,
+                    city:data.address?.billing?.city || user.address.billing.city,
+                    pincode:data.address?.billing?.pincode || user.address.billing.pincode
+
+                }
+
+            }},{new:true})
         return res.status(200).send({status:true,data:updatedData})
         
 
