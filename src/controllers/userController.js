@@ -201,7 +201,7 @@ const createUser =async (req,res)=>{
                 }
                
            //DOUBT
-           
+          
         console.log(data)       
 
         let saveData = await userModel.create(data)
