@@ -6,7 +6,9 @@ const jwt = require("jsonwebtoken")
 const { AutoScaling } = require("aws-sdk")
 const { uploadFile } = require("./aws")
 
-
+const isValidIncludes=function(value,requestBody){
+    return Object.keys(requestBody).includes(value)
+}
 
 const isValidRequestBody = function (value) {
     return Object.keys(value).length > 0
@@ -28,23 +30,15 @@ const createUser = async (req, res) => {
     try {
 
         let data = req.body
-        data = JSON.parse(JSON.stringify(data))
-        if (!isValidRequestBody(data)) {
+        
+        let file=req.files
+        //data = JSON.parse(JSON.stringify(data))
+        if (!isValidRequestBody(data) && (file==undefined || file.length==0)) {
             res.status(400).send({ status: false, message: "invalid request parameters.plzz provide user details" })
             return
         }
-        let file = req.files
-        console.log(file)
-        if (file && file.length > 0) {
-
-            let uploadedFileURL = await uploadFile(file[0])
-
-            data["profileImage"] = uploadedFileURL
-        }
-        else {
-            return res.status(400).send({ msg: "No file found" })
-        }
-
+        
+        
 
 
         //Validate attributes --
@@ -126,18 +120,14 @@ const createUser = async (req, res) => {
         }
         data.address = JSON.parse(data.address)
 
-        //address=JSON.parse(address)
-        //console.log(address)
-        //console.log(typeof address)
+        
 
         if (typeof data.address != "object") {
             return res.status(400).send({ status: false, message: "address should be an object" })
         }
         let { shipping, billing } = data.address
 
-        console.log(typeof shipping)
-        console.log(shipping)
-        //console.log(shipping.city)
+        
 
         if (!shipping) {
 
@@ -148,13 +138,7 @@ const createUser = async (req, res) => {
         if (typeof shipping != "object") {
             return res.status(400).send({ status: false, message: "shipping should be an object" })
         }
-        if (!billing) {
-            return res.status(400).send({ status: false, message: "billing is required" })
-        }
-
-        if (typeof billing != "object") {
-            return res.status(400).send({ status: false, message: "billing should be an object" })
-        }
+        
 
         if (!isValid(shipping.street)) {
             return res.status(400).send({ status: false, message: "shipping street is required" })
@@ -175,12 +159,20 @@ const createUser = async (req, res) => {
 
         //applicable only for numeric values and extend to be 6 characters only--
         if (!/^\d{6}$/.test(shipping.pincode)) {
-            return res.status(400).send({ status: false, message: "plz enter valid pincode" });
+            return res.status(400).send({ status: false, message: "plz enter valid shipping pincode" });
+        }
+        if (!billing) {
+            return res.status(400).send({ status: false, message: "billing is required" })
+        }
+
+        if (typeof billing != "object") {
+            return res.status(400).send({ status: false, message: "billing should be an object" })
         }
 
         if (!isValid(billing.street)) {
             return res.status(400).send({ status: false, message: "billing street is required" })
         }
+        
 
 
         if (!isValid(billing.city)) {
@@ -200,9 +192,20 @@ const createUser = async (req, res) => {
             return res.status(400).send({ status: false, message: "plz enter valid  billing pincode" });
         }
 
-        //DOUBT
 
-        console.log(data)
+        
+        if (file && file.length > 0) {
+
+            let uploadedFileURL = await uploadFile(file[0])
+
+            data["profileImage"] = uploadedFileURL
+        }
+        else {
+            return res.status(400).send({status:false, message: "No file found" })
+        }
+
+
+        
 
         let saveData = await userModel.create(data)
         return res.status(201).send({ status: true, message: "success", data: saveData })
@@ -247,6 +250,7 @@ const loginUser = async function (req, res) {
                 .status(400)
                 .send({ status: false, msg: "please provide password" });
         }
+        password=password.trim()
         if (password.length < 8 || password.length > 15) {
             return res.status(400).send({ status: false, message: "plzz enter valid password" })
         }
@@ -263,7 +267,7 @@ const loginUser = async function (req, res) {
         const passwordMathched = await bcrypt.compare(password, dbPassword)
         console.log(passwordMathched)
         if (!passwordMathched) {
-            return res.status(400).send({ status: false, message: "Please provide valid credentils" })
+            return res.status(404).send({ status: false, message: "Please provide valid credentils" })
         }
 
 
@@ -299,15 +303,15 @@ const getUser = async function (req, res) {
         if (!ObjectId.isValid(pathParams)) {
             return res.status(400).send({ status: false, message: "Please enter valid userId" })
         }
-        let authorToken = req.userId
-        if (!ObjectId.isValid(authorToken)) {
-            return res.status(400).send({ status: false, message: "Please enter valid user token" })
+        let userToken = req.userId
+        if (!ObjectId.isValid(userToken)) {
+            return res.status(400).send({ status: false, message: "Please enter valid userId" })
         }
         let user = await userModel.findOne({ _id: pathParams })
         if (!user) {
             return res.status(404).send({ status: false, message: "No user found" })
         }
-        if (authorToken !== pathParams) {
+        if (userToken !== pathParams) {
             return res.status(403).send({ status: false, message: "Unauthorized user" })
         }
         let data = await userModel.findOne({ _id: pathParams })
@@ -332,7 +336,7 @@ const updateUser = async function (req, res) {
         }
         let authorToken = req.userId
         if (!ObjectId.isValid(authorToken)) {
-            return res.status(400).send({ status: false, message: "Please enter valid user token" })
+            return res.status(400).send({ status: false, message: "Please enter valid userId" })
         }
         let user = await userModel.findOne({ _id: pathParams })
         if (!user) {
@@ -346,7 +350,7 @@ const updateUser = async function (req, res) {
 
 
 
-        let data = JSON.parse(JSON.stringify(req.body))
+        let data = req.body
 
         let file = req.files
         // console.log(file)
@@ -356,12 +360,13 @@ const updateUser = async function (req, res) {
 
             data["profileImage"] = uploadedFileURL
         }
-        if (!isValidRequestBody(data)) {
-            return res.status(400).send({ status: false, message: "Nothing to update" })
+        if(!isValidRequestBody(data) && (file==undefined || file.length==0)){
+            return res.status(400).send({status:false,message:"plz enter valid data for updation"})
+
         }
         let { email, phone, lname, fname, password, address } = data
         console.log(address)
-        if (email) {
+        if (isValidIncludes("email",data)) {
             if (!isValid(email)) {
                 return res.status(400).send({ status: false, message: "plzz enter email" })
             }
@@ -382,7 +387,7 @@ const updateUser = async function (req, res) {
 
         }
 
-        if (phone) {
+        if (isValidIncludes("phone",data)) {
             if (!isValid(phone)) {
                 return res.status(400).send({ status: false, message: "plzz enter mobile" })
             }
@@ -409,16 +414,8 @@ const updateUser = async function (req, res) {
 
         // console.log(address) 
 
-        if (data?.fname == '') {
-            console.log(1)
-            return res.status(400).send({ status: false, message: "Please enter fname" })
-
-        }
-
-
-        console.log(typeof data.fname)
-        console.log(data.fname)
-        if (data?.fname) {
+        
+        if (isValidIncludes("fname",data)) {
 
             if (!isValid(fname)) {
                 return res.status(400).send({ status: false, message: "Please enter valid fname" })
@@ -426,24 +423,16 @@ const updateUser = async function (req, res) {
             data.fname = fname
 
         }
-        if (data?.lname == '') {
-            console.log(1)
-            return res.status(400).send({ status: false, message: "Please enter lname" })
-
-        }
-        if (data?.lname) {
+        
+        if (isValidIncludes("lname",data)) {
             if (!isValid(lname)) {
                 return res.status(400).send({ status: false, message: "Please enter valid lname" })
 
             }
             data.lname = lname
         }
-        if (data?.password == '') {
-            console.log(1)
-            return res.status(400).send({ status: false, message: "Please enter password" })
-
-        }
-        if (data?.password) {
+        
+        if (isValidIncludes("password",data)) {
             if (!isValid(password)) {
                 return res.status(400).send({ status: false, message: "plzz enter password" })
             }
@@ -463,21 +452,30 @@ const updateUser = async function (req, res) {
 
 
         }
-        if (data?.address == '') {
+        
+
+         
+        if (isValidIncludes("address",data)) {
             console.log(1)
-            return res.status(400).send({ status: false, message: "Please enter fname" })
-
-        }
-
-
-        if (data?.address) {
-            console.log(1)
-            data.address = JSON.parse(data.address)
+            if (!isValid(address)) {
+                return res.status(400).send({ status: false, message: "plzz enter address" })
+            }
+            console.log(2)
             console.log(typeof data.address)
+            data.address = JSON.parse(data.address)
+            console.log(3)
+            console.log(typeof data.address)
+            console.log(data.address)
+            
             if (typeof data.address != "object") {
                 return res.status(400).send({ status: false, message: "Address must be in object" })
 
             }
+            if (Object.keys(data.address).length == 0) {
+                return res.status(400).send({ status: false, message: "No keys are given in address" })
+
+            }
+
 
             let { shipping, billing } = data.address
 
