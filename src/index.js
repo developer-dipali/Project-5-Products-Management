@@ -17,6 +17,15 @@ mongoose.connect("mongodb+srv://Shreya1998:1234.qwer@cluster0.gzlyp.mongodb.net/
 
 app.use('/', route);
 
+app.all("*",(req,res)=>{
+    throw new Error("Bad request")
+})
+app.use((e,req,res,next)=>{
+    if(e.message === "Bad request"){
+        res.status(400).send({status:false,error:e.message})
+    }
+})
+
 app.listen(process.env.PORT || 4000, function () {
     console.log('Express app running on port ' + (process.env.PORT || 4000))
 });

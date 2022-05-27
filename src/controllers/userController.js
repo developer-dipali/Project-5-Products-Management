@@ -106,6 +106,7 @@ const createUser = async (req, res) => {
         if (!isValid(phone)) {
             return res.status(400).send({ status: false, message: "plzz enter mobile" })
         }
+        console.log(typeof phone)
 
         //this regex will to set the phone no. length to 10 numeric digits only.
         if (!/^(\+91)?0?[6-9]\d{9}$/.test(phone.trim())) {
@@ -123,7 +124,17 @@ const createUser = async (req, res) => {
         if (!address) {
             return res.status(400).send({ status: false, message: "address is required" })
         }
+        console.log(typeof data.address)
+        console.log(data.address[0])
+        if(data.address[0]!='{' && data.address[data.address.length-1]!='}'){
+            console.log(10)
+            return res.status(400).send({ status: false, message: "address should be an object" })
+        }
+        
         data.address = JSON.parse(data.address)
+        
+        
+        console.log(1)
 
 
 
@@ -466,8 +477,10 @@ const updateUser = async function (req, res) {
                 return res.status(400).send({ status: false, message: "plzz enter address" })
             }
             console.log(2)
-            console.log(typeof data.address)
-            data.address = JSON.parse(data.address)
+            //console.log(typeof data)
+            console.log(data)
+            //data.address=(data.address).toString()
+            data.address = JSON.parse(data.address).toString()
             console.log(3)
             console.log(typeof data.address)
             console.log(data.address)
@@ -611,6 +624,7 @@ const updateUser = async function (req, res) {
 
     }
     catch (err) {
+        console.log(err)
         return res.status(500).send({ status: false, message: err.message })
     }
 }
