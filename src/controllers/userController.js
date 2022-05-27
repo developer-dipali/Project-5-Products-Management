@@ -200,7 +200,7 @@ const createUser =async (req,res)=>{
                     return res.status(400).send({ status: false, message: "plz enter valid  billing pincode" });
                 }
                
-           //DOUBT
+          
           
         console.log(data)       
 
@@ -343,19 +343,9 @@ const loginUser = async function (req, res) {
         if(authorToken!==pathParams){
             return res.status(403).send({status:false,message:"Unauthorized user"})
         }
-        
           
 
           let data=JSON.parse(JSON.stringify(req.body))
-
-          let file= req.files
-        // console.log(file)
-        if(file && file.length>0){
-           
-            let uploadedFileURL= await uploadFile( file[0] )
-           
-            data["profileImage"]=uploadedFileURL
-        }
           if(!isValidRequestBody(data)){
               return res.status(400).send({status:false,message:"Nothing to update"})
           } 
@@ -407,43 +397,30 @@ const loginUser = async function (req, res) {
     }
 
           
-        // console.log(address) 
-        
-        if(data?.fname==''){
-            console.log(1)
-            return res.status(400).send({status:false,message:"Please enter fname"})
-
+        console.log(address) 
+        let file= req.files
+        console.log(file)
+        if(file && file.length>0){
+           
+            let uploadedFileURL= await uploadFile( file[0] )
+           
+            data["profileImage"]=uploadedFileURL
         }
-
-
-        console.log(typeof data.fname)
-        console.log(data.fname)
-        if(data?.fname){
-            
+        
+        if(fname){
             if(!isValid(fname)){
                 return res.status(400).send({status:false,message:"Please enter valid fname"})
             }
             data.fname=fname 
-        
         }
-        if(data?.lname==''){
-            console.log(1)
-            return res.status(400).send({status:false,message:"Please enter lname"})
-
-        }
-        if(data?.lname){
+        if(lname){
         if(!isValid(lname)){
             return res.status(400).send({status:false,message:"Please enter valid lname"})
             
         }
         data.lname=lname
        }
-       if(data?.password==''){
-        console.log(1)
-        return res.status(400).send({status:false,message:"Please enter password"})
-
-    }
-        if(data?.password){
+        if(password){
             if (!isValid(password)) {
                 return res.status(400).send({ status: false, message: "plzz enter password" })
             }
@@ -463,14 +440,9 @@ const loginUser = async function (req, res) {
     
             
         }
-        if(data?.address==''){
-            console.log(1)
-            return res.status(400).send({status:false,message:"Please enter fname"})
-
-        }
        
         
-        if(data?.address){
+        if(address){
             console.log(1)
             data.address=JSON.parse(data.address)
             console.log(typeof data.address)
