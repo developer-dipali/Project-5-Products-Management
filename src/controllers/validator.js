@@ -1,8 +1,16 @@
+
+//=====================Common Validations============================//
+
+
+//cheaks Request Body is Empty or Not
 const isValidRequestBody = function (value) {
     return Object.keys(value).length > 0
   }
+
+
+//it checks whether the string contain only space or not 
   const validString = function(value) {
-    if (typeof value === 'string' && value.trim().length === 0) return false //it checks whether the string contain only space or not 
+    if (typeof value === 'string' && value.trim().length === 0) return false 
     return true;
 }
 

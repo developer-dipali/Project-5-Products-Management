@@ -2,9 +2,6 @@ const jwt = require("jsonwebtoken");
 
 
 
-
-
-
 const authToken = (token)=>{
     let tokenValidate = jwt.verify(token,"project5",(err,data)=>{
         if(err) 
