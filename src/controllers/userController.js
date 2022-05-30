@@ -5,26 +5,10 @@ const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 const { AutoScaling } = require("aws-sdk")
 const { uploadFile } = require("./aws")
+let {isValid,isValidIncludes,validInstallment,validString,isValidRequestBody}=require("./validator")
 
 
-//==================Common Validation===========================//
 
-//cheacking Empty request Body 
-const isValidIncludes = function (value, requestBody) {
-    return Object.keys(requestBody).includes(value)
-}
-
-const isValidRequestBody = function (value) {
-    return Object.keys(value).length > 0
-}
-
-//validaton check for the type of Value 
-const isValid = (value) => {
-    if (typeof value == 'undefined' || value == null) return false;
-    if (typeof value == 'string' && value.trim().length == 0) return false;
-    if (typeof value === 'number' && value.toString().trim().length === 0) return false;
-    return true
-}
 
 
 //================================Create User API=============================//
@@ -131,15 +115,19 @@ const createUser = async (req, res) => {
         if (!address) {
             return res.status(400).send({ status: false, message: "address is required" })
         }
+        if(data.address[0]!='{' || data.address[data.address.length-1]!='}'){
+            return res.status(400).send({status:false,message:"Address must be in object"})
+        }
         data.address = JSON.parse(data.address)
 
 
         // this validation will check the address is in the object format or not
 
-        if (typeof data.address != "object") {
-            return res.status(400).send({ status: false, message: "address should be an object" })
-        }
+        
         let { shipping, billing } = data.address        //destructuring
+        if(Object.keys(data.address).length==0){
+            return res.status(400).send({status:false,message:"No keys are present in address"})
+        }
 
 
         //Shipping field validation==>
@@ -286,11 +274,9 @@ const loginUser = async function (req, res) {
 
         //matching of encrypted Password
         const dbPassword = emailCheck.password
-        console.log(dbPassword)
+        
 
-        //const salt=await bcrypt.genSalt(10)
-        //   let hashPassword=await bcrypt.hash(password,salt)
-        //   console.log(hashPassword)
+        
         const passwordMathched = await bcrypt.compare(password, dbPassword)
         console.log(passwordMathched)
         if (!passwordMathched) {
@@ -494,30 +480,27 @@ const updateUser = async function (req, res) {
             //Password Encryption
             const salt = await bcrypt.genSalt(10)
             data.password = await bcrypt.hash(password, salt)
-            //console.log(data.password)
+            
 
         }
 
 
         //address validation
         if (isValidIncludes("address", data)) {
-            console.log(1)
+            
             if (!isValid(address)) {
                 return res.status(400).send({ status: false, message: "plzz enter address" })
             }
 
-            console.log(2)
-            console.log(typeof data.address)
-            data.address = JSON.parse(data.address)
-            console.log(3)
-            console.log(typeof data.address)
-            console.log(data.address)
-
-
-            if (typeof data.address != "object") {
-                return res.status(400).send({ status: false, message: "Address must be in object" })
-
+            
+            if(data.address[0]!='{' || data.address[data.address.length-1]!='}'){
+                return res.status(400).send({status:false,message:"Address must be in object"})
             }
+            
+            data.address = JSON.parse(data.address)
+            
+
+            
             if (Object.keys(data.address).length == 0) {
                 return res.status(400).send({ status: false, message: "No keys are given in address" })
 
@@ -526,10 +509,7 @@ const updateUser = async function (req, res) {
             //Destructuring
             let { shipping, billing } = data.address
 
-            // console.log(3)
-            // console.log(shipping)
-            // console.log(typeof shipping)
-
+            
             //Shipping Feild Validation
             if (shipping) {
 

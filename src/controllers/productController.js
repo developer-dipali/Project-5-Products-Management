@@ -3,7 +3,7 @@ const ObjectId = require("mongoose").Types.ObjectId
 const aws = require("aws-sdk")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
-const { AutoScaling } = require("aws-sdk")
+
 const { uploadFile } = require("./aws")
 let { isValid, isValidIncludes, validInstallment, validString, isValidRequestBody } = require("./validator")
 
@@ -15,8 +15,7 @@ const createProduct = async function (req, res) {
     try {
         let file = req.files;
         let requestBody = req.body;
-        console.log(requestBody)
-        let productImage;
+        
 
         //validating empty req body.
         if (!isValidRequestBody(requestBody)) {
@@ -114,12 +113,11 @@ const createProduct = async function (req, res) {
 
         }
 
-        console.log(typeof isFreeShipping)
-        console.log(Object.keys(requestBody).includes("isFreeShipping"))
-        console.log(requestBody)
+        
+        
         if (isValidIncludes("isFreeShipping", requestBody)) {
 
-            console.log(5)
+            
             if (!isValid(isFreeShipping)) {
                 return res.status(400).send({ status: false, message: "isFreeShipping must be present" })
 
@@ -131,7 +129,7 @@ const createProduct = async function (req, res) {
         }
 
 
-        console.log(6)
+        
 
         productImage = requestBody["productImage"]
 
@@ -278,7 +276,7 @@ const updateProduct = async function (req, res) {
         let pathParams = req.params.productId
         let data = req.body
         let file = req.files
-        console.log(file)
+        
 
 
         //===========validations===========//
@@ -357,7 +355,7 @@ const updateProduct = async function (req, res) {
 
         if (isValidIncludes("isFreeShipping", data)) {
 
-            console.log(data)
+            
             if (!["true", "false"].includes(isFreeShipping)) {
                 return res.status(400).send({ status: false, message: "isFreeShipping must be a boolean value" })
             }
