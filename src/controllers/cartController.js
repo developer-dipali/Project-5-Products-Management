@@ -3,14 +3,14 @@ const userModel =require("../models/userModel")
 const cartModel =require("../models/cartModel")
 const ObjectId=require("mongoose").Types.ObjectId
 let {isValid,isValidIncludes,validInstallment,validString,isValidRequestBody}=require("./validator")
-//const { find } = require("../models/productModel")
 
 const createCart=async function(req,res){
     try{
     let userId=req.params.userId 
     let data=req.body 
-    let {productId,quantity,cartId}=data 
+    let {productId,cartId}=data 
     let userToken=req.userId
+    
     if (!ObjectId.isValid(userId)) {
         return res.status(400).send({ status: false, message: "user id is not valid" })
     }
@@ -55,19 +55,20 @@ const createCart=async function(req,res){
     if(!validProduct){
         return res.status(404).send({status:false,message:"Product not present"})
     }
-    if(!quantity){
+    if(!data.quantity){
         data.quantity=1
     }
     else{  
         
-    if(!isValid(quantity)){
+    if(!isValid(data.quantity)){
         return res.status(400).send({status:false,message:"Please enter quantity"})
     }
-    if(!validInstallment(quantity)){
+    if(!validInstallment(data.quantity)){
         return res.status(400).send({status:false,message:"Quantity must be a postive no"})
     }
 }
-    
+let {quantity}=data
+
     
 
     
@@ -242,7 +243,7 @@ const createCart=async function(req,res){
     if (userToken !== userId) {
         return res.status(403).send({ status: false, message: "Unauthorized user" })
     }
-    let findCart=await cartModel.findOne({userId:userId})
+    let findCart=await cartModel.findOne({userId:userId}).populate("items.productId")
     if(!findCart){
         return res.status(404).send({status:false,message:"Cart is not present with this particular user id"})
     }

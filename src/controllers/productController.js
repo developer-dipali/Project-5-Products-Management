@@ -75,7 +75,7 @@ const createProduct = async function (req, res) {
         if (isNaN(price) || price < 0) {
             return res.status(400).send({ status: false, message: "Price can only be positive number" })
         }
-        console.log(currencyId)
+        requestBody.price=Number(price).toFixed(2)
 
         if (!isValid(currencyId)) {
             return res.status(400).send({ status: false, message: "currencyId is required" })
@@ -136,8 +136,7 @@ const createProduct = async function (req, res) {
         }
         // if (!isValidIncludes("availableSizes", requestBody)) {
             let sizesArray = availableSizes.split(",").map(x => x.trim())
-            console.log(sizesArray)
-            console.log(typeof sizesArray)
+            
 
 
             for (let i = 0; i < sizesArray.length; i++) {
@@ -288,6 +287,7 @@ const updateProduct = async function (req, res) {
         let data = req.body
         let file = req.files
         
+        
 
 
         //===========validations===========//
@@ -307,6 +307,13 @@ const updateProduct = async function (req, res) {
             return res.status(400).send({ status: false, message: "plz enter valid data for updation" })
 
         }
+        
+
+        if (file && file.length > 0) {
+            let uploadedFileURL = await uploadFile(file[0])
+            data["productImage"] = uploadedFileURL
+        }
+
 
         //Destructuring====>
 
@@ -341,10 +348,11 @@ const updateProduct = async function (req, res) {
             }
 
             //searching Price must Positive Number
-            if (isNaN(price) || price < 0) {
+            if (isNaN(price) || price <= 0) {
                 return res.status(400).send({ status: false, message: "Price can only be positive number" })
             }
         }
+        data.price=Number(price).toFixed(2)
 
 
         if (isValidIncludes("installments", data)) {
@@ -372,21 +380,23 @@ const updateProduct = async function (req, res) {
             }
         }
 
-        if (file && file.length > 0) {
-            let uploadedFileURL = await uploadFile(file[0])
-            data["productImage"] = uploadedFileURL
-        }
+        
 
         if (isValidIncludes("availableSizes", data)) {
             let sizesArray = availableSizes.split(",").map(x => x.trim())
-
+            
 
             for (let i = 0; i < sizesArray.length; i++) {
                 if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(sizesArray[i]))) {
                     console.log(sizesArray[i])
                     return res.status(400).send({ status: false, message: "AvailableSizes should be among ['S','XS','M','X','L','XXL','XL']" })
                 }
+                if (sizesArray.indexOf(sizesArray[i]) != i) {
+                    
+                    return res.status(400).send({ status: false, message: "Duplicate size is present" })
+                }
             }
+            
         }
         if (isValidIncludes("currencyId", data)) {
             if (!isValid(currencyId)) {

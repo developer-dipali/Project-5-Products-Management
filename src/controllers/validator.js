@@ -37,7 +37,7 @@ const isValid = (value) => {
     return true
   }
 
- module.exports={isValid,isValidIncludes,validInstallment,validString,isValidRequestBody} 
+ module.exports={isValid,isValidIncludes,validInstallment,validInstallment1,validString,isValidRequestBody} 
 
 
 
