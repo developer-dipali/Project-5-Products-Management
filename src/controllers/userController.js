@@ -324,6 +324,7 @@ const getUser = async function (req, res) {
 
         //Authrization
         let userToken = req.userId
+        
         if (!ObjectId.isValid(userToken)) {
             return res.status(400).send({ status: false, message: "Please enter valid userId" })
         }

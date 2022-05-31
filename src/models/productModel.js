@@ -47,6 +47,7 @@ const productSchema = new mongoose.Schema({
     availableSizes: [{
         type: String,
         trim: true,
+        required:true,
         enum: ["S", "XS", "M", "X", "L", "XXL", "XL"]
     }],
     installments: {
@@ -57,7 +58,7 @@ const productSchema = new mongoose.Schema({
         type: Date
     },
     isDeleted: {
-        ype: Boolean,
+        type: Boolean,
         default: false
     },
 }, { timestamps: true });

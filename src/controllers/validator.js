@@ -16,9 +16,13 @@ const isValidRequestBody = function (value) {
 
 //for product
 const validInstallment = function (value) {
-if (value <= 0) return false
+if (value <=0) return false
 if (value % 1 == 0) return true;
 }
+const validInstallment1 = function (value) {
+  if (value <0) return false
+  if (value % 1 == 0) return true;
+  }
 
 const isValidIncludes=function(value,requestBody){
     return Object.keys(requestBody).includes(value)

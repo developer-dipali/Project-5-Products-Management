@@ -55,12 +55,18 @@ const createCart=async function(req,res){
     if(!validProduct){
         return res.status(404).send({status:false,message:"Product not present"})
     }
+    if(!quantity){
+        data.quantity=1
+    }
+    else{  
+        
     if(!isValid(quantity)){
         return res.status(400).send({status:false,message:"Please enter quantity"})
     }
     if(!validInstallment(quantity)){
         return res.status(400).send({status:false,message:"Quantity must be a postive no"})
     }
+}
     
     
 
@@ -183,9 +189,6 @@ const createCart=async function(req,res){
             }
     
           
-           
-    
-           
             
             if (removeProduct == 0) {
                 

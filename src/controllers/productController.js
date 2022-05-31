@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 
 const { uploadFile } = require("./aws")
-let { isValid, isValidIncludes, validInstallment, validString, isValidRequestBody } = require("./validator")
+let { isValid, isValidIncludes, validInstallment,validInstallment1, validString, isValidRequestBody } = require("./validator")
 
 
 
@@ -55,6 +55,7 @@ const createProduct = async function (req, res) {
             let uploadedFileURL = await uploadFile(file[0])
 
             requestBody["productImage"] = uploadedFileURL
+            productImage = requestBody["productImage"]
         }
         else {
             return res.status(400).send({ status: false, message: "No file found" })
@@ -107,7 +108,7 @@ const createProduct = async function (req, res) {
 
             }
 
-            if (!validInstallment(installments)) {
+            if (!validInstallment1(installments)) {
                 return res.status(400).send({ status: false, message: "installments must be number " })
             }
 
@@ -128,14 +129,12 @@ const createProduct = async function (req, res) {
 
         }
 
-
-        
-
-        productImage = requestBody["productImage"]
-
-
         //validating sizes to take multiple sizes at a single attempt.
-        if (isValidIncludes("availableSizes", requestBody)) {
+
+        if (!isValid(availableSizes)) {
+            return res.status(400).send({ status: false, message: "plz enter at least one size" })
+        }
+        // if (!isValidIncludes("availableSizes", requestBody)) {
             let sizesArray = availableSizes.split(",").map(x => x.trim())
             console.log(sizesArray)
             console.log(typeof sizesArray)
@@ -149,13 +148,13 @@ const createProduct = async function (req, res) {
                 if (sizesArray.indexOf(sizesArray[i]) != i) {
                     return res.status(400).send({ status: false, message: "Duplicate size is present" })
                 }
-            }
+            // }
 
 
             //using array.isArray function to check the value is array or not.
-            if (Array.isArray(sizesArray)) {
+            
                 requestBody['availableSizes'] = [...sizesArray]
-            }
+            
 
         }
         const saveProductDetails = await productModel.create(requestBody)
@@ -184,14 +183,24 @@ const getProducts = async function (req, res) {
         //=======validations =======//
         if (isValidRequestBody(getQuery)) {
             let { size, name, priceGreaterThan, priceLessThan } = getQuery;
+            let y= Object.keys(getQuery)
+            
 
+            let findFilter = y.filter(i=>!["size", "name", "priceGreaterThan", "priceLessThan"].includes(i))
+            if(findFilter.length>0){
+                return res.status(400).send({status:false,message:"You can only filter by size,name,price greater than ,price less than"})
+            }
+            
 
+            
 
             //filter by size,name,price greater than ,price less than key Only
             if (!(size || name || priceGreaterThan || priceLessThan)) {
                 return res.status(400).send({ status: false, message: "You can only filter by size,name,price greater than ,price less than" })
             }
+            console.log(x)
 
+            
 
             if (isValid(priceGreaterThan)) {
                 query.price = { $gt: priceGreaterThan }
@@ -251,7 +260,9 @@ const getProductById = async function (req, res) {
         }
 
         //get data from DB===>>
-        let product = await productModel.findOne({ _id: pathParams, isDeleted: false })
+    
+        let product = await productModel.findOne({ _id: pathParams,isDeleted:false})
+        console.log(product)
         if (!product) {
             return res.status(404).send({ status: false, message: "No product found" })
         }
@@ -342,7 +353,7 @@ const updateProduct = async function (req, res) {
             }
 
 
-            if (!validInstallment(installments)) {
+            if (!validInstallment1(installments)) {
                 return res.status(400).send({ status: false, message: "installments must be number " })
             }
 
