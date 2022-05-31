@@ -26,11 +26,19 @@ const createCart=async function(req,res){
         res.status(400).send({ status: false, message: "invalid request parameters.plzz provide user details" })
         return
     }
+    let findCart=await cartModel.findOne({userId:userId})
+
+    
+    if(findCart){
+
+    
     if(!isValid(cartId)){
         return res.status(400).send({status:false,message:"Please enter cartId"})
     }
+
     if (!ObjectId.isValid(cartId)) {
         return res.status(400).send({ status: false, message: "cart id is not valid" })
+    }
     }
     
     
@@ -53,7 +61,7 @@ const createCart=async function(req,res){
     if(!validInstallment(quantity)){
         return res.status(400).send({status:false,message:"Quantity must be a postive no"})
     }
-    let findCart=await cartModel.findOne({userId:userId})
+    
     
 
     
@@ -69,6 +77,7 @@ const createCart=async function(req,res){
         const newCart=await cartModel.create(cart)
         return res.status(201).send({status:true,message:"cart created successfully",data:newCart})
     }
+    
     if(findCart){
         if(cartId!=findCart._id){
             return res.status(400).send({status:false,message:`This cart is not present for this user ${userId}`})
@@ -80,6 +89,7 @@ const createCart=async function(req,res){
             
         for (let i=0;i<itemsArr.length;i++) {
             if (itemsArr[i].productId.toString() === productId) {
+                
                     itemsArr[i].quantity += quantity
 
                     let itemAddedInCart = { items: itemsArr, totalPrice: price, totalItems: itemsArr.length }
