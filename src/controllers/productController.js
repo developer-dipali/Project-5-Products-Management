@@ -134,8 +134,10 @@ const createProduct = async function (req, res) {
         if (!isValid(availableSizes)) {
             return res.status(400).send({ status: false, message: "plz enter at least one size" })
         }
-        // if (!isValidIncludes("availableSizes", requestBody)) {
+        //if (!isValidIncludes("availableSizes", requestBody)) {
+            
             let sizesArray = availableSizes.split(",").map(x => x.trim())
+            console.log(sizesArray)
             
 
 
@@ -147,19 +149,21 @@ const createProduct = async function (req, res) {
                 if (sizesArray.indexOf(sizesArray[i]) != i) {
                     return res.status(400).send({ status: false, message: "Duplicate size is present" })
                 }
-            // }
+             }
 
 
-            //using array.isArray function to check the value is array or not.
+            
             
                 requestBody['availableSizes'] = [...sizesArray]
             
 
-        }
+        //}
         const saveProductDetails = await productModel.create(requestBody)
         return res.status(201).send({ status: true, message: "Product added successfully.", data: saveProductDetails })
 
-    } catch (err) {
+    } 
+    
+    catch (err) {
         return res.status(500).send({
             status: false,
             message: "Error is : " + err
@@ -194,10 +198,10 @@ const getProducts = async function (req, res) {
             
 
             //filter by size,name,price greater than ,price less than key Only
-            if (!(size || name || priceGreaterThan || priceLessThan)) {
-                return res.status(400).send({ status: false, message: "You can only filter by size,name,price greater than ,price less than" })
-            }
-            console.log(x)
+            // if (!(size || name || priceGreaterThan || priceLessThan)) {
+            //     return res.status(400).send({ status: false, message: "You can only filter by size,name,price greater than ,price less than" })
+            // }
+            
 
             
 

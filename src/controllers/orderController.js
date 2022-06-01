@@ -140,6 +140,12 @@ const updateOrder=async function(req,res){
         return res.status(404).send({status:false,message:"Order id and user id doesnot match"})
 
     }
+    if((status=="pending" || status=="canceled") && checkOrder.status=="completed"){
+        return res.status(400).send({status:false,message:"You can't change status once it is completed"})
+    }
+    if((status=="pending" || status=="completed") && checkOrder.status=="canceled"){
+        return res.status(400).send({status:false,message:"You can't change status once it is canceled"})
+    }
     if(status=="canceled" && checkOrder.cancellable==false){
     
         return res.status(400).send({status:false,message:"You can't update as cancellable is not true"})

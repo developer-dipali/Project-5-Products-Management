@@ -280,7 +280,7 @@ const loginUser = async function (req, res) {
         const passwordMathched = await bcrypt.compare(password, dbPassword)
         console.log(passwordMathched)
         if (!passwordMathched) {
-            return res.status(404).send({ status: false, message: "Please provide valid credentils" })
+            return res.status(401).send({ status: false, message: "Please provide valid credentils" })
         }
 
 
