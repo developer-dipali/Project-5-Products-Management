@@ -57,8 +57,7 @@ const createOrder=async function(req,res){
 
 
     }
-     console.log(data?.cancellable)
-     console.log(data.hasOwnProperty(cancellable))
+     
     if(isValidIncludes("cancellable",data)){
         if(!isValid(cancellable)){
             return res.status(400).send({status:false,message:"Please enter cancellable"})

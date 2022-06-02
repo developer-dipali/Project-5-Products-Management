@@ -185,13 +185,13 @@ const getProducts = async function (req, res) {
 
         //=======validations =======//
         if (isValidRequestBody(getQuery)) {
-            let { size, name, priceGreaterThan, priceLessThan } = getQuery;
+            let { size, name, priceGreaterThan, priceLessThan,priceSort } = getQuery;
             let y= Object.keys(getQuery)
             
 
-            let findFilter = y.filter(i=>!["size", "name", "priceGreaterThan", "priceLessThan"].includes(i))
+            let findFilter = y.filter(i=>!["size", "name", "priceGreaterThan", "priceLessThan","priceSort"].includes(i))
             if(findFilter.length>0){
-                return res.status(400).send({status:false,message:"You can only filter by size,name,price greater than ,price less than"})
+                return res.status(400).send({status:false,message:"You can only filter by size,name,price greater than ,price less than,priceSort"})
             }
             
 
@@ -204,12 +204,22 @@ const getProducts = async function (req, res) {
             
 
             
-
-            if (isValid(priceGreaterThan)) {
+            if(isValidIncludes("priceGreaterThan",getQuery)){
+            if (!isValid(priceGreaterThan)) {
+                return res.status(400).send({status:false,message:"Please enter price greater than"})
+            }
+                if(isNaN(priceGreaterThan) ||priceGreaterThan<0){
+                    return res.status(400).send({status:false,message:"Price should be positive no"})
+                }
                 query.price = { $gt: priceGreaterThan }
             }
-
-            if (isValid(priceLessThan)) {
+            if(isValidIncludes("priceLessThan",getQuery)){
+            if (!isValid(priceLessThan)) {
+                return res.status(400).send({status:false,message:"Please enter price less than"})
+            }
+                if(isNaN(priceLessThan) || priceLessThan<0){
+                    return res.status(400).send({status:false,message:"Price should be positive no"})
+                }
                 query.price = { $lt: priceLessThan }
             }
 
@@ -217,25 +227,56 @@ const getProducts = async function (req, res) {
                 query.price = { $gt: priceGreaterThan, $lt: priceLessThan }
             }
 
-
-            if (isValid(name)) {
+            if(isValidIncludes("name",getQuery)){
+            if (!isValid(name)) {
+                return res.status(400).send({status:false,message:"Please enter name"})
+            }
                 name = name.trim()
                 query.title = { $regex: name, $options: "i" }
             }
+            if(isValidIncludes("size",getQuery)){
+            if (!isValid(size)) {
+                return res.status(400).send({status:false,message:"Please enter size"})
 
-            if (isValid(size)) {
-                const sizeArr = size
+            }
+                const sizesArray = size
                     .trim()
                     .split(",")
                     .map((x) => x.trim().toUpperCase());
+                    for (let i = 0; i < sizesArray.length; i++) {
+                        if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(sizesArray[i]))) {
+                            console.log(sizesArray[i])
+                            return res.status(400).send({ status: false, message: "AvailableSizes should be among ['S','XS','M','X','L','XXL','XL']" })
+                        }
+                        if (sizesArray.indexOf(sizesArray[i]) != i) {
+                            return res.status(400).send({ status: false, message: "Duplicate size is present" })
+                        }
+                     }
 
-                query.availableSizes = { $all: sizeArr }; //selects the documents where the value of a field is an array that contains all the specified elements
+                query.availableSizes = { $all: sizesArray }; //selects the documents where the value of a field is an array that contains all the specified elements
             }
+            if(isValidIncludes("priceSort",getQuery)){
+            if(!isValid(priceSort)){
+                return res.status(400).send({status:false,message:"Please enter priceSort"})
+                
+                
+
+            }
+            if(![-1,1].includes(Number(priceSort))){
+                return res.status(400).send({status:false,message:"You can only enter -1 or +1 in priceSort"})
+            }
+            const getProduct = await productModel.find(query).sort({ price: `${priceSort}` })
+                if (getProduct.length === 0) {
+                    return res.status(404).send({ status: false, message: "No products found" });
+                }
+                return res.status(200).send({ status: true, data: getProduct })
+        }
+            
         }
 
 
         ///save Product Detail to DB
-        const getProduct = await productModel.find(query).sort({ price: 1 })
+        const getProduct = await productModel.find(query)
         if (getProduct.length === 0) {
             return res.status(404).send({ status: false, message: "No products found" });
         }
@@ -355,8 +396,9 @@ const updateProduct = async function (req, res) {
             if (isNaN(price) || price <= 0) {
                 return res.status(400).send({ status: false, message: "Price can only be positive number" })
             }
+            data.price=Number(price).toFixed(2)
         }
-        data.price=Number(price).toFixed(2)
+        
 
 
         if (isValidIncludes("installments", data)) {
