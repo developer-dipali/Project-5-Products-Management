@@ -16,7 +16,12 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true,
         lowercase: true,
-        trim:true
+        trim:true, validate:{
+            validator:function(v){
+                return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(v);
+            },
+            message:"This is not a valid email"
+        } 
     },
     profileImage: {
         type: String,
@@ -26,7 +31,13 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        trim:true
+        trim:true,
+        validate:{
+            validator:function(v){
+                return /^(\+91)?0?[6-9]\d{9}$/.test.test(v);
+            },
+            message:"Please enter valid 10 digit mobile number"
+        } 
         
     },
     password: {
