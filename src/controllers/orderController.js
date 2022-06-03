@@ -110,7 +110,7 @@ const createOrder=async function(req,res){
     findCart.totalPrice=0
     findCart.save()
 
-    return res.status(200).send({status:true,message:"Success",data:orderCreated})
+    return res.status(201).send({status:true,message:"Success",data:orderCreated})
     
 
 

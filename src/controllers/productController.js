@@ -155,7 +155,7 @@ const createProduct = async function (req, res) {
         requestBody['availableSizes'] = [...sizesArray]
     
         const saveProductDetails = await productModel.create(requestBody)
-        return res.status(201).send({ status: true, message: "Product added successfully.", data: saveProductDetails })
+        return res.status(201).send({ status: true,message: 'Success', data: saveProductDetails })
 
     }
 
@@ -269,7 +269,7 @@ const getProducts = async function (req, res) {
         if (getProduct.length === 0) {
             return res.status(404).send({ status: false, message: "No products found" });
         }
-        return res.status(200).send({ status: true, data: getProduct })
+        return res.status(200).send({ status: true, message: 'Success',data: getProduct })
 
     }
     catch (err) {
@@ -301,7 +301,7 @@ const getProductById = async function (req, res) {
         }
 
 
-        return res.status(200).send({ status: true, message: "Product details", data: product })
+        return res.status(200).send({ status: true, message: "Success", data: product })
 
 
 
@@ -457,7 +457,7 @@ const updateProduct = async function (req, res) {
         //Updating data in DB
         let updateProduct = await productModel.findByIdAndUpdate({ _id: pathParams }, data, { new: true })
 
-        return res.status(200).send({ status: true, message: "success", data: updateProduct })
+        return res.status(200).send({ status: true, message: "Success", data: updateProduct })
 
 
 
@@ -495,7 +495,7 @@ const deleteById = async function (req, res) {
 
         //Delete data From DB
         let deleteProduct = await productModel.findByIdAndUpdate(pathParams, { $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true })
-        return res.status(200).send({ status: true, message: "Product deleted successfully",data:deleteProduct })
+        return res.status(200).send({ status: true, message: "Success",data:deleteProduct })
 
 
 

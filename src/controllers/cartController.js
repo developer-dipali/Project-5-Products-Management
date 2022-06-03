@@ -100,7 +100,7 @@ let {quantity}=data
         }
         
         const newCart=await cartModel.create(cart)
-        return res.status(201).send({status:true,message:"cart created successfully",data:newCart})
+        return res.status(201).send({status:true,message:"Success",data:newCart})
     }
     
     //if cart is available for user add product details from user
@@ -124,7 +124,7 @@ let {quantity}=data
 
                     let newData = await cartModel.findOneAndUpdate({ _id: findCart._id }, itemAddedInCart, { new: true })
 
-                    return res.status(200).send({ status: true, message: `Product added successfully`, data: newData })
+                    return res.status(201).send({ status: true, message: `Success`, data: newData })
             }
          }
          
@@ -134,7 +134,7 @@ let {quantity}=data
         let itemAddedInCart = { items: itemsArr, totalPrice: price, totalItems: itemsArr.length }
         let newData = await cartModel.findOneAndUpdate({ _id: findCart._id }, itemAddedInCart, { new: true })
 
-        return res.status(200).send({ status: true, message: `Product added successfully`, data: newData })
+        return res.status(201).send({ status: true, message: `Success`, data: newData })
      } 
 
     }
@@ -251,7 +251,7 @@ let {quantity}=data
                 validCart.save()
     
             }
-            return res.status(200).send({ status: true, data: validCart })
+            return res.status(200).send({ status: true,message:"Success", data: validCart })
     
     
     
@@ -295,7 +295,7 @@ let {quantity}=data
     }
 
 
-    return res.status(200).send({status:true,data:findCart})
+    return res.status(200).send({status:true,message:"Success",data:findCart})
         }
         catch(err){
             return res.status(500).send({status:false,message:err.message})
@@ -346,7 +346,7 @@ let {quantity}=data
     }
 
     await cartModel.findByIdAndUpdate(findCart._id,cart)
-    return res.status(204).send({status:true,message:"Cart deleted successfully"})
+    return res.status(204).send({status:true,message:"Success"})
 
         }
         catch(err){

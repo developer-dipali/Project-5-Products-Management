@@ -627,7 +627,7 @@ const updateUser = async function (req, res) {
 
         //Upadate data and Save
         let updatedData = await userModel.findByIdAndUpdate({ _id: pathParams }, data, { new: true })
-        return res.status(200).send({ status: true, data: updatedData })
+        return res.status(200).send({ status: true,message: 'Success', data: updatedData })
 
 
     }
