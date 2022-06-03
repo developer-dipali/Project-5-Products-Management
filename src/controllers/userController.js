@@ -9,8 +9,6 @@ let {isValid,isValidIncludes,validInstallment,validString,isValidRequestBody}=re
 
 
 
-
-
 //================================Create User API=============================//
 const createUser = async (req, res) => {
 
@@ -69,7 +67,7 @@ const createUser = async (req, res) => {
         }
 
 
-          //searching Email in DB to maintain their uniqueness.
+        //searching Email in DB to maintain their uniqueness.
         const emailExt = await userModel.findOne({ email: email })
         if (emailExt) {
             return res.status(400).send({ status: false, message: "Email already exists" })
@@ -115,6 +113,7 @@ const createUser = async (req, res) => {
         if (!address) {
             return res.status(400).send({ status: false, message: "address is required" })
         }
+        
         if(data.address[0]!='{' || data.address[data.address.length-1]!='}'){
             return res.status(400).send({status:false,message:"Address must be in object"})
         }
@@ -275,16 +274,11 @@ const loginUser = async function (req, res) {
         //matching of encrypted Password
         const dbPassword = emailCheck.password
         
-
-        
         const passwordMathched = await bcrypt.compare(password, dbPassword)
         console.log(passwordMathched)
         if (!passwordMathched) {
             return res.status(401).send({ status: false, message: "Please provide valid credentils" })
         }
-
-
-
 
         //Ganeration of JWT Token
 
@@ -365,6 +359,7 @@ const updateUser = async function (req, res) {
 
         //Authrization
         let authorToken = req.userId
+        
         if (!ObjectId.isValid(authorToken)) {
             return res.status(400).send({ status: false, message: "Please enter valid userId" })
         }

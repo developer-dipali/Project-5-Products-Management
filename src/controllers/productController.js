@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 
 const { uploadFile } = require("./aws")
-let { isValid, isValidIncludes, validInstallment,validInstallment1, validString, isValidRequestBody } = require("./validator")
+let { isValid, isValidIncludes, validInstallment, validInstallment1, validString, isValidRequestBody } = require("./validator")
 
 
 
@@ -15,7 +15,7 @@ const createProduct = async function (req, res) {
     try {
         let file = req.files;
         let requestBody = req.body;
-        
+
 
         //validating empty req body.
         if (!isValidRequestBody(requestBody)) {
@@ -75,7 +75,7 @@ const createProduct = async function (req, res) {
         if (isNaN(price) || price < 0) {
             return res.status(400).send({ status: false, message: "Price can only be positive number" })
         }
-        requestBody.price=Number(price).toFixed(2)
+        requestBody.price = Number(price).toFixed(2)
 
         if (!isValid(currencyId)) {
             return res.status(400).send({ status: false, message: "currencyId is required" })
@@ -114,11 +114,11 @@ const createProduct = async function (req, res) {
 
         }
 
-        
-        
+
+
         if (isValidIncludes("isFreeShipping", requestBody)) {
 
-            
+
             if (!isValid(isFreeShipping)) {
                 return res.status(400).send({ status: false, message: "isFreeShipping must be present" })
 
@@ -135,34 +135,30 @@ const createProduct = async function (req, res) {
             return res.status(400).send({ status: false, message: "plz enter at least one size" })
         }
         //if (!isValidIncludes("availableSizes", requestBody)) {
-            
-            let sizesArray = availableSizes.split(",").map(x => x.trim())
-            console.log(sizesArray)
-            
+
+        let sizesArray = availableSizes.split(",").map(x => x.trim())
+        console.log(sizesArray)
 
 
-            for (let i = 0; i < sizesArray.length; i++) {
-                if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(sizesArray[i]))) {
-                    console.log(sizesArray[i])
-                    return res.status(400).send({ status: false, message: "AvailableSizes should be among ['S','XS','M','X','L','XXL','XL']" })
-                }
-                if (sizesArray.indexOf(sizesArray[i]) != i) {
-                    return res.status(400).send({ status: false, message: "Duplicate size is present" })
-                }
-             }
 
+        for (let i = 0; i < sizesArray.length; i++) {
+            if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(sizesArray[i]))) {
+                console.log(sizesArray[i])
+                return res.status(400).send({ status: false, message: "AvailableSizes should be among ['S','XS','M','X','L','XXL','XL']" })
+            }
 
-            
-            
-                requestBody['availableSizes'] = [...sizesArray]
-            
+            if (sizesArray.indexOf(sizesArray[i]) != i) {
+                return res.status(400).send({ status: false, message: "Duplicate size is present" })
+            }
+        }
 
-        //}
+        requestBody['availableSizes'] = [...sizesArray]
+    
         const saveProductDetails = await productModel.create(requestBody)
         return res.status(201).send({ status: true, message: "Product added successfully.", data: saveProductDetails })
 
-    } 
-    
+    }
+
     catch (err) {
         return res.status(500).send({
             status: false,
@@ -185,40 +181,32 @@ const getProducts = async function (req, res) {
 
         //=======validations =======//
         if (isValidRequestBody(getQuery)) {
-            let { size, name, priceGreaterThan, priceLessThan,priceSort } = getQuery;
-            let y= Object.keys(getQuery)
-            
+            let { size, name, priceGreaterThan, priceLessThan, priceSort } = getQuery;
+            let y = Object.keys(getQuery)
 
-            let findFilter = y.filter(i=>!["size", "name", "priceGreaterThan", "priceLessThan","priceSort"].includes(i))
-            if(findFilter.length>0){
-                return res.status(400).send({status:false,message:"You can only filter by size,name,price greater than ,price less than,priceSort"})
+
+            let findFilter = y.filter(i => !["size", "name", "priceGreaterThan", "priceLessThan", "priceSort"].includes(i))
+            if (findFilter.length > 0) {
+                return res.status(400).send({ status: false, message: "You can only filter by size,name,price greater than ,price less than,priceSort" })
             }
-            
 
-            
 
-            //filter by size,name,price greater than ,price less than key Only
-            // if (!(size || name || priceGreaterThan || priceLessThan)) {
-            //     return res.status(400).send({ status: false, message: "You can only filter by size,name,price greater than ,price less than" })
-            // }
-            
-
-            
-            if(isValidIncludes("priceGreaterThan",getQuery)){
-            if (!isValid(priceGreaterThan)) {
-                return res.status(400).send({status:false,message:"Please enter price greater than"})
-            }
-                if(isNaN(priceGreaterThan) ||priceGreaterThan<0){
-                    return res.status(400).send({status:false,message:"Price should be positive no"})
+            if (isValidIncludes("priceGreaterThan", getQuery)) {
+                if (!isValid(priceGreaterThan)) {
+                    return res.status(400).send({ status: false, message: "Please enter price greater than" })
+                }
+                if (isNaN(priceGreaterThan) || priceGreaterThan < 0) {
+                    return res.status(400).send({ status: false, message: "Price should be positive no" })
                 }
                 query.price = { $gt: priceGreaterThan }
             }
-            if(isValidIncludes("priceLessThan",getQuery)){
-            if (!isValid(priceLessThan)) {
-                return res.status(400).send({status:false,message:"Please enter price less than"})
-            }
-                if(isNaN(priceLessThan) || priceLessThan<0){
-                    return res.status(400).send({status:false,message:"Price should be positive no"})
+
+            if (isValidIncludes("priceLessThan", getQuery)) {
+                if (!isValid(priceLessThan)) {
+                    return res.status(400).send({ status: false, message: "Please enter price less than" })
+                }
+                if (isNaN(priceLessThan) || priceLessThan < 0) {
+                    return res.status(400).send({ status: false, message: "Price should be positive no" })
                 }
                 query.price = { $lt: priceLessThan }
             }
@@ -227,51 +215,52 @@ const getProducts = async function (req, res) {
                 query.price = { $gt: priceGreaterThan, $lt: priceLessThan }
             }
 
-            if(isValidIncludes("name",getQuery)){
-            if (!isValid(name)) {
-                return res.status(400).send({status:false,message:"Please enter name"})
-            }
+            if (isValidIncludes("name", getQuery)) {
+                if (!isValid(name)) {
+                    return res.status(400).send({ status: false, message: "Please enter name" })
+                }
                 name = name.trim()
                 query.title = { $regex: name, $options: "i" }
             }
-            if(isValidIncludes("size",getQuery)){
-            if (!isValid(size)) {
-                return res.status(400).send({status:false,message:"Please enter size"})
+            if (isValidIncludes("size", getQuery)) {
+                if (!isValid(size)) {
+                    return res.status(400).send({ status: false, message: "Please enter size" })
 
-            }
+                }
                 const sizesArray = size
                     .trim()
                     .split(",")
                     .map((x) => x.trim().toUpperCase());
-                    for (let i = 0; i < sizesArray.length; i++) {
-                        if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(sizesArray[i]))) {
-                            console.log(sizesArray[i])
-                            return res.status(400).send({ status: false, message: "AvailableSizes should be among ['S','XS','M','X','L','XXL','XL']" })
-                        }
-                        if (sizesArray.indexOf(sizesArray[i]) != i) {
-                            return res.status(400).send({ status: false, message: "Duplicate size is present" })
-                        }
-                     }
+                for (let i = 0; i < sizesArray.length; i++) {
+                    if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(sizesArray[i]))) {
+                        console.log(sizesArray[i])
+                        return res.status(400).send({ status: false, message: "AvailableSizes should be among ['S','XS','M','X','L','XXL','XL']" })
+                    }
+                    if (sizesArray.indexOf(sizesArray[i]) != i) {
+                        return res.status(400).send({ status: false, message: "Duplicate size is present" })
+                    }
+                }
 
                 query.availableSizes = { $all: sizesArray }; //selects the documents where the value of a field is an array that contains all the specified elements
             }
-            if(isValidIncludes("priceSort",getQuery)){
-            if(!isValid(priceSort)){
-                return res.status(400).send({status:false,message:"Please enter priceSort"})
-                
-                
+            if (isValidIncludes("priceSort", getQuery)) {
+                if (!isValid(priceSort)) {
+                    return res.status(400).send({ status: false, message: "Please enter priceSort" })
 
-            }
-            if(![-1,1].includes(Number(priceSort))){
-                return res.status(400).send({status:false,message:"You can only enter -1 or +1 in priceSort"})
-            }
-            const getProduct = await productModel.find(query).sort({ price: `${priceSort}` })
+
+
+                }
+                if (![-1, 1].includes(Number(priceSort))) {
+                    return res.status(400).send({ status: false, message: "You can only enter -1 or +1 in priceSort" })
+                }
+
+                const getProduct = await productModel.find(query).sort({ price: `${priceSort}` })
                 if (getProduct.length === 0) {
                     return res.status(404).send({ status: false, message: "No products found" });
                 }
                 return res.status(200).send({ status: true, data: getProduct })
-        }
-            
+            }
+
         }
 
 
@@ -304,8 +293,8 @@ const getProductById = async function (req, res) {
         }
 
         //get data from DB===>>
-    
-        let product = await productModel.findOne({ _id: pathParams,isDeleted:false})
+
+        let product = await productModel.findOne({ _id: pathParams, isDeleted: false })
         console.log(product)
         if (!product) {
             return res.status(404).send({ status: false, message: "No product found" })
@@ -325,15 +314,13 @@ const getProductById = async function (req, res) {
 
 
 
-//==========================================================Update API======================================================//
+//==========================================================Update Product API======================================================//
+
 const updateProduct = async function (req, res) {
     try {
         let pathParams = req.params.productId
         let data = req.body
         let file = req.files
-        
-        
-
 
         //===========validations===========//
         if (!ObjectId.isValid(pathParams)) {
@@ -352,7 +339,7 @@ const updateProduct = async function (req, res) {
             return res.status(400).send({ status: false, message: "plz enter valid data for updation" })
 
         }
-        
+
 
         if (file && file.length > 0) {
             let uploadedFileURL = await uploadFile(file[0])
@@ -396,9 +383,9 @@ const updateProduct = async function (req, res) {
             if (isNaN(price) || price <= 0) {
                 return res.status(400).send({ status: false, message: "Price can only be positive number" })
             }
-            data.price=Number(price).toFixed(2)
+            data.price = Number(price).toFixed(2)
         }
-        
+
 
 
         if (isValidIncludes("installments", data)) {
@@ -420,17 +407,16 @@ const updateProduct = async function (req, res) {
 
         if (isValidIncludes("isFreeShipping", data)) {
 
-            
+
             if (!["true", "false"].includes(isFreeShipping)) {
                 return res.status(400).send({ status: false, message: "isFreeShipping must be a boolean value" })
             }
         }
 
-        
 
         if (isValidIncludes("availableSizes", data)) {
             let sizesArray = availableSizes.split(",").map(x => x.trim())
-            
+
 
             for (let i = 0; i < sizesArray.length; i++) {
                 if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(sizesArray[i]))) {
@@ -438,16 +424,18 @@ const updateProduct = async function (req, res) {
                     return res.status(400).send({ status: false, message: "AvailableSizes should be among ['S','XS','M','X','L','XXL','XL']" })
                 }
                 if (sizesArray.indexOf(sizesArray[i]) != i) {
-                    
+
                     return res.status(400).send({ status: false, message: "Duplicate size is present" })
                 }
             }
-            
+
         }
         if (isValidIncludes("currencyId", data)) {
             if (!isValid(currencyId)) {
                 return res.status(400).send({ status: false, message: "CurrencyId required" })
             }
+
+            //CurrecncyId must be INR
             if (currencyId != "INR") {
                 return res.status(400).send({ status: false, message: "currencyId should be INR" })
             }
@@ -507,7 +495,7 @@ const deleteById = async function (req, res) {
 
         //Delete data From DB
         let deleteProduct = await productModel.findByIdAndUpdate(pathParams, { $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true })
-        return res.status(200).send({ status: true, message: "Product deleted successfully" })
+        return res.status(200).send({ status: true, message: "Product deleted successfully",data:deleteProduct })
 
 
 
